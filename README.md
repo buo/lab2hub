@@ -1,3 +1,4 @@
+[![Gem Version](https://badge.fury.io/rb/lab2hub.svg)](https://badge.fury.io/rb/lab2hub)
 # Lab2hub
 
 Easily migrate your projects from GitLab to GitHub.
