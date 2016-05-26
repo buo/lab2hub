@@ -3,14 +3,38 @@
 
 Easily migrate your projects from GitLab to GitHub.
 
-## Usage
+## Installation
 
 ```sh
 gem install lab2hub
+```
+
+## Usage
+
+```sh
 lab2hub --config
 vi config.yaml
 lab2hub PROJECT_NAME_ON_GITLAB
 ```
+
+### config.yaml
+
+`config.yaml` file contains the private access tokens for GitHub and GitLab,
+and those tokens are neccessary to access your private repositories on GitLab and
+create new repositories on GitHub.
+
+Create `config.yaml` file in the currently working with `lab2hub --config`, and
+open the file with an text editor, and then replace `GITHUB_PERSONAL_ACCESS_TOKEN` and `GITLAB_PRIVATE_TOKEN` with your own tokens:
+
+```yaml
+github: GITHUB_PERSONAL_ACCESS_TOKEN
+gitlab: GITLAB_PRIVATE_TOKEN
+```
+
+Access tokens can be generated and obtained from here:
+
+- GitHub: https://github.com/settings/tokens
+- GitLab: https://gitlab.com/profile/account
 
 ## Development
 
