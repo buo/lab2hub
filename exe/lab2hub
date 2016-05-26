@@ -74,6 +74,7 @@ begin
   repo = github.repos.create({
     name: project.name,
     description: project.description,
+    homepage: nil,
     private: !project.public
   })
   puts repo
