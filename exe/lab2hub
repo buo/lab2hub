@@ -1,0 +1,111 @@
+#!/usr/bin/env ruby
+
+require 'github_api'
+require 'gitlab'
+require 'optparse'
+require 'pp'
+require 'yaml'
+
+# This hash will hold all of the options parsed from the command-line by
+# OptionParser.
+options = {}
+
+optparse = OptionParser.new do |opts|
+  # Set a banner, displayed at the top of the help screen.
+  opts.banner = "Usage: lab2hub [options] PROJECT"
+
+  opts.on('--config', 'Create a config file in the working directory.') do
+    options[:config] = true
+  end
+
+  # This displays the help screen, all programs are assumed to have this option.
+  opts.on('-h', '--help', 'Display this screen.') do
+    puts opts
+    exit
+  end
+end
+
+# Parse the command-line.
+optparse.parse!
+
+if options[:config]
+  src = File.expand_path('../../tools/config.example.yaml', __FILE__)
+  dst = 'config.yaml'
+
+  if File.exists? src
+    puts 'already exists.'
+    exit
+  end
+
+  FileUtils.cp src, dst
+  puts 'created config.yaml'
+
+  exit
+end
+
+config = YAML::load(File.open('config.yaml'))
+
+github = Github.new oauth_token: config["github"]
+Gitlab.configure do |gitlab|
+  gitlab.endpoint = 'https://gitlab.com/api/v3'
+  gitlab.private_token = config["gitlab"]
+end
+
+target = ARGV.first
+
+unless target
+  puts 'Specify the project name to migrate'
+  exit
+end
+
+# Retrieve all projects
+project = Gitlab.projects.auto_paginate.select do |item|
+  item.name == target
+end.first
+
+unless project
+  puts "Could not find the #{target} on GitLab"
+  exit
+end
+
+pp project
+
+begin
+  repo = github.repos.create({
+    name: project.name,
+    description: project.description,
+    private: !project.public
+  })
+  puts repo
+
+  # Clone repository
+  cmd = File.expand_path('../../tools/migrate.sh', __FILE__)
+  arg1 = project.name
+  arg2 = project.ssh_url_to_repo
+  arg3 = repo.ssh_url
+  puts %x(#{cmd} "#{arg1}" "#{arg2}" "#{arg3}")
+
+  # Migrate issues
+  Gitlab.issues(project.id).auto_paginate.each do |issue|
+    puts '-' * 80
+    pp issue
+    created = github.issues.create({
+      user: repo.owner.login,
+      repo: repo.name,
+      title: issue.title,
+      body: issue.description,
+      labels: issue.labels
+    })
+    pp created
+    if issue.state == 'closed'
+      github.issues.edit({
+        user: repo.owner.login,
+        repo: repo.name,
+        number: created.number,
+        state: 'closed'
+      })
+    end
+  end
+rescue Github::Error::UnprocessableEntity => e
+  puts e
+end
