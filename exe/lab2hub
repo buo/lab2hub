@@ -98,6 +98,24 @@ begin
       labels: issue.labels
     })
     pp created
+
+    # Issue notes (comments)
+    notes = Gitlab.issue_notes(project.id, issue.id).auto_paginate
+
+    notes.select! do |note|
+      note.body != 'Status changed to closed' && note.body != 'Status changed to reopened'
+    end
+
+    # Sort by
+    notes.each do |note|
+      github.issues.comments.create({
+        user: repo.owner.login,
+        repo: repo.name,
+        number: created.number,
+        body: note.body
+      })
+    end
+
     if issue.state == 'closed'
       github.issues.edit({
         user: repo.owner.login,
