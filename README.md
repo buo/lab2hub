@@ -17,6 +17,13 @@ vi config.yaml
 lab2hub PROJECT_NAME_ON_GITLAB
 ```
 
+## Known issues (TODO)
+
+- [ ] Attachments in issue notes(comments)
+- [ ] Milestones
+- [ ] Labels
+- [ ] Wiki
+
 ### config.yaml
 
 `config.yaml` file contains the private access tokens for GitHub and GitLab,
