@@ -17,12 +17,19 @@ vi config.yaml
 lab2hub PROJECT_NAME_ON_GITLAB
 ```
 
-## Known issues (TODO)
+## Features
 
-- [ ] Attachments in issue notes(comments)
-- [ ] Milestones
-- [ ] Labels
-- [ ] Wiki
+lab2hub migrates your:
+
+- Project's title, description, visibility (public or private), and git repository.
+- Issues with comments
+
+### Work In Progress (WIP)
+
+- Attachments in issue notes(comments)
+- Milestones
+- Labels
+- Wiki
 
 ### config.yaml
 
